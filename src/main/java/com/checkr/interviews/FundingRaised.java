@@ -7,7 +7,18 @@ import java.io.IOException;
 
 public class FundingRaised {
 
-    static filters obj = new filters();
+    static Filters filterAction = new Filters();
+  
+
+    public static Map<String, String> CsvRowToMap(int i, List<String[]> csvData) {
+        String[] KeyFilters = { "permalink", "company_name", "number_employees", "category", "city", "state",
+                "funded_date", "raised_amount", "raised_currency", "round" };
+        Map<String, String> mapped = new HashMap<String, String>();
+        for (int j = 0; j < 10; j++) {
+            mapped.put(KeyFilters[j], csvData.get(i)[j]);
+        }
+        return mapped;
+    }
 
     public static List<Map<String, String>> where(Map<String, String> options) throws IOException {
         List<String[]> csvData = new ArrayList<String[]>();
@@ -21,27 +32,34 @@ public class FundingRaised {
         csvData.remove(0);
 
         if (options.containsKey("company_name")) {
-            csvData = obj.FilterByKey(options.get("company_name"), 1, csvData);
+            csvData = filterAction.FilterByKey(options.get("company_name"), 1, csvData);
         }
 
         if (options.containsKey("city")) {
-            csvData = obj.FilterByKey(options.get("city"), 4, csvData);
+            csvData = filterAction.FilterByKey(options.get("city"), 4, csvData);
         }
 
         if (options.containsKey("state")) {
-            csvData = obj.FilterByKey(options.get("state"), 5, csvData);
+            csvData = filterAction.FilterByKey(options.get("state"), 5, csvData);
         }
 
         if (options.containsKey("round")) {
-            csvData = obj.FilterByKey(options.get("round"), 9, csvData);
+            csvData = filterAction.FilterByKey(options.get("round"), 9, csvData);
         }
 
         List<Map<String, String>> output = new ArrayList<Map<String, String>>();
         for (int i = 0; i < csvData.size(); i++) {
-            Map<String, String> mapped = obj.CsvRowToMap(i, csvData);
+            Map<String, String> mapped = CsvRowToMap(i, csvData);
             output.add(mapped);
         }
         return output;
+    }
+
+    public static boolean rowMatchesFilters(Map<String, String> row, Map<String, String> options) {
+        return ((!options.containsKey("company_name") || row.get("company_name").equals(options.get("company_name")))
+                && (!options.containsKey("city") || row.get("city").equals(options.get("city")))
+                && (!options.containsKey("state") || row.get("state").equals(options.get("state")))
+                && (!options.containsKey("round") || row.get("round").equals(options.get("round"))));
     }
 
     public static Map<String, String> findBy(Map<String, String> options) throws IOException, NoSuchEntryException {
@@ -61,47 +79,9 @@ public class FundingRaised {
 
         for (int i = 0; i < csvData.size(); i++) {
 
-            for(int j=0; j <headers.length;j++ ){
-                if(options.containsKey(headers[j])){
-                    if (csvData.get(i)[positions[j]].equals(options.get(headers[j]))) {
-                        mapped = obj.CsvRowToMap(i, csvData);
-                    } else {
-                        continue;
-                    }
-                }
+            if(rowMatchesFilters(CsvRowToMap(i, csvData), options)){
+                return CsvRowToMap(i, csvData);
             }
-            if (options.containsKey("company_name")) {
-                if (csvData.get(i)[1].equals(options.get("company_name"))) {
-                    mapped = obj.CsvRowToMap(i, csvData);
-                } else {
-                    continue;
-                }
-            }
-
-            if (options.containsKey("city")) {
-                if (csvData.get(i)[4].equals(options.get("city"))) {
-                    mapped = obj.CsvRowToMap(i, csvData);
-                } else {
-                    continue;
-                }
-            }
-
-            if (options.containsKey("state")) {
-                if (csvData.get(i)[5].equals(options.get("state"))) {
-                    mapped = obj.CsvRowToMap(i, csvData);
-                } else {
-                    continue;
-                }
-            }
-
-            if (options.containsKey("round")) {
-                if (csvData.get(i)[9].equals(options.get("round"))) {
-                    mapped = obj.CsvRowToMap(i, csvData);
-                } else {
-                    continue;
-                }
-            }
-            return mapped;
         }
         throw new NoSuchEntryException();
     }

@@ -7,7 +7,10 @@ import java.io.IOException;
 
 public class FundingRaised {
 
-    public static List<String[]> KeyType(String key, int position, List<String[]> Data) {
+    static String[] KeyFilters = { "permalink", "company_name", "number_employees", "category", "city", "state", "funded_date",
+    "raised_amount", "raised_currency", "round" };
+
+    public static List<String[]> FilterByKey(String key, int position, List<String[]> Data) {
         List<String[]> results = new ArrayList<String[]>();
 
         for (int i = 0; i < Data.size(); i++) {
@@ -30,35 +33,27 @@ public class FundingRaised {
         csvData.remove(0);
 
         if (options.containsKey("company_name")) {
-            csvData = KeyType(options.get("company_name"), 1, csvData);
+            csvData = FilterByKey(options.get("company_name"), 1, csvData);
         }
 
         if (options.containsKey("city")) {
-            csvData = KeyType(options.get("city"), 4, csvData);
+            csvData = FilterByKey(options.get("city"), 4, csvData);
         }
 
         if (options.containsKey("state")) {
-            csvData = KeyType(options.get("state"), 5, csvData);
+            csvData = FilterByKey(options.get("state"), 5, csvData);
         }
 
         if (options.containsKey("round")) {
-            csvData = KeyType(options.get("round"), 9, csvData);
+            csvData = FilterByKey(options.get("round"), 9, csvData);
         }
 
         List<Map<String, String>> output = new ArrayList<Map<String, String>>();
-
         for (int i = 0; i < csvData.size(); i++) {
             Map<String, String> mapped = new HashMap<String, String>();
-            mapped.put("permalink", csvData.get(i)[0]);
-            mapped.put("company_name", csvData.get(i)[1]);
-            mapped.put("number_employees", csvData.get(i)[2]);
-            mapped.put("category", csvData.get(i)[3]);
-            mapped.put("city", csvData.get(i)[4]);
-            mapped.put("state", csvData.get(i)[5]);
-            mapped.put("funded_date", csvData.get(i)[6]);
-            mapped.put("raised_amount", csvData.get(i)[7]);
-            mapped.put("raised_currency", csvData.get(i)[8]);
-            mapped.put("round", csvData.get(i)[9]);
+            for (int j = 0; j < 10; j++) {
+                mapped.put(KeyFilters[j], csvData.get(i)[j]);
+            }
             output.add(mapped);
         }
 

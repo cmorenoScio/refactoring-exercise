@@ -55,12 +55,7 @@ public class FundingRaised {
         return output;
     }
 
-    public static boolean rowMatchesFilters(Map<String, String> row, Map<String, String> options) {
-        return ((!options.containsKey("company_name") || row.get("company_name").equals(options.get("company_name")))
-                && (!options.containsKey("city") || row.get("city").equals(options.get("city")))
-                && (!options.containsKey("state") || row.get("state").equals(options.get("state")))
-                && (!options.containsKey("round") || row.get("round").equals(options.get("round"))));
-    }
+    
 
     public static Map<String, String> findBy(Map<String, String> options) throws IOException, NoSuchEntryException {
         List<String[]> csvData = new ArrayList<String[]>();
@@ -73,13 +68,10 @@ public class FundingRaised {
 
         reader.close();
         csvData.remove(0);
-        Map<String, String> mapped = new HashMap<String, String>();
-        String headers [] = {"company_name","city","state","round"};
-        int positions [] = {1,4,5,9};
 
         for (int i = 0; i < csvData.size(); i++) {
 
-            if(rowMatchesFilters(CsvRowToMap(i, csvData), options)){
+            if(filterAction.rowMatchesFilters(CsvRowToMap(i, csvData), options)){
                 return CsvRowToMap(i, csvData);
             }
         }

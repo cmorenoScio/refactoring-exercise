@@ -1,6 +1,9 @@
 package com.checkr.interviews;
 
 import java.util.*;
+
+import javax.print.DocFlavor.STRING;
+
 import com.opencsv.CSVReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -8,7 +11,18 @@ import java.io.IOException;
 public class FundingRaised {
 
     static Filters filterAction = new Filters();
-  
+
+    public static List<String[]> openFile(String file) throws IOException {
+        List<String[]> csvData = new ArrayList<String[]>();
+        CSVReader reader = new CSVReader(new FileReader(file));
+        String[] row = null;
+        while ((row = reader.readNext()) != null) {
+            csvData.add(row);
+        }
+        reader.close();
+        csvData.remove(0);
+        return csvData;
+    }
 
     public static Map<String, String> CsvRowToMap(int i, List<String[]> csvData) {
         String[] KeyFilters = { "permalink", "company_name", "number_employees", "category", "city", "state",
@@ -21,15 +35,7 @@ public class FundingRaised {
     }
 
     public static List<Map<String, String>> where(Map<String, String> options) throws IOException {
-        List<String[]> csvData = new ArrayList<String[]>();
-        CSVReader reader = new CSVReader(new FileReader("startup_funding.csv"));
-        String[] row = null;
-        while ((row = reader.readNext()) != null) {
-            csvData.add(row);
-        }
-
-        reader.close();
-        csvData.remove(0);
+        List<String[]> csvData = openFile("startup_funding.csv");
 
         if (options.containsKey("company_name")) {
             csvData = filterAction.FilterByKey(options.get("company_name"), 1, csvData);
@@ -55,23 +61,12 @@ public class FundingRaised {
         return output;
     }
 
-    
-
     public static Map<String, String> findBy(Map<String, String> options) throws IOException, NoSuchEntryException {
-        List<String[]> csvData = new ArrayList<String[]>();
-        CSVReader reader = new CSVReader(new FileReader("startup_funding.csv"));
-        String[] row = null;
-
-        while ((row = reader.readNext()) != null) {
-            csvData.add(row);
-        }
-
-        reader.close();
-        csvData.remove(0);
+        List<String[]> csvData = openFile("startup_funding.csv");
 
         for (int i = 0; i < csvData.size(); i++) {
 
-            if(filterAction.rowMatchesFilters(CsvRowToMap(i, csvData), options)){
+            if (filterAction.rowMatchesFilters(CsvRowToMap(i, csvData), options)) {
                 return CsvRowToMap(i, csvData);
             }
         }
